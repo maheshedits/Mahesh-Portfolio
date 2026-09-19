@@ -32,3 +32,29 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     }
   });
 });
+
+const videoModal = document.getElementById("videoModal");
+const videoFrame = document.getElementById("videoFrame");
+const videoModalTitle = document.getElementById("videoModalTitle");
+
+document.querySelectorAll(".project-card[data-video]").forEach(card => {
+  card.addEventListener("click", () => {
+    const id = card.dataset.video;
+    videoModalTitle.textContent = card.dataset.title || "Project";
+    videoFrame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    videoModal.classList.add("open");
+    videoModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  });
+});
+
+function closeVideo() {
+  videoModal.classList.remove("open");
+  videoModal.setAttribute("aria-hidden", "true");
+  videoFrame.src = "";
+  document.body.style.overflow = "";
+}
+document.querySelectorAll("[data-close-video]").forEach(el => el.addEventListener("click", closeVideo));
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && videoModal.classList.contains("open")) closeVideo();
+});
