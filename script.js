@@ -1,283 +1,151 @@
-/* =========================================================
-   MAHESH PORTFOLIO — JAVASCRIPT
-========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* =======================================================
-     SMOOTH CURSOR GLOW
-  ======================================================= */
+  /* SMOOTH CURSOR GLOW */
+  const glow = document.querySelector(".cursor-glow");
 
-  const cursorGlow = document.querySelector(".cursor-glow");
+  if (glow && window.matchMedia("(pointer:fine)").matches) {
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let currentX = targetX;
+    let currentY = targetY;
 
-  if (cursorGlow && window.matchMedia("(pointer: fine)").matches) {
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-
-    let glowX = mouseX;
-    let glowY = mouseY;
-
-    window.addEventListener("mousemove", (event) => {
-      mouseX = event.clientX;
-      mouseY = event.clientY;
-
-      cursorGlow.style.opacity = "1";
-    }, { passive: true });
+    window.addEventListener("mousemove", (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      glow.style.opacity = "1";
+    }, { passive:true });
 
     window.addEventListener("mouseleave", () => {
-      cursorGlow.style.opacity = "0";
+      glow.style.opacity = "0";
     });
 
-    function animateCursor() {
+    const tick = () => {
+      currentX += (targetX - currentX) * 0.20;
+      currentY += (targetY - currentY) * 0.20;
 
-      /* Smooth interpolation — no laggy CSS left/top updates */
-      glowX += (mouseX - glowX) * 0.16;
-      glowY += (mouseY - glowY) * 0.16;
+      glow.style.transform =
+        `translate3d(${currentX}px,${currentY}px,0) translate(-50%,-50%)`;
 
-      cursorGlow.style.transform =
-        `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
+      requestAnimationFrame(tick);
+    };
 
-      requestAnimationFrame(animateCursor);
-    }
-
-    animateCursor();
+    tick();
   }
 
 
-  /* =======================================================
-     SCROLL REVEAL
-  ======================================================= */
+  /* SCROLL REVEAL */
+  const reveals = document.querySelectorAll(".reveal");
 
-  const revealItems = document.querySelectorAll(".reveal");
-
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-
-      entries.forEach((entry) => {
-
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          revealObserver.unobserve(entry.target);
-        }
-
-      });
-
-    },
-    {
-      threshold: 0.12
-    }
-  );
-
-  revealItems.forEach((item) => {
-    revealObserver.observe(item);
-  });
-
-
-  /* =======================================================
-     SKILL BAR ANIMATION
-  ======================================================= */
-
-  const skillPanel = document.querySelector(".skills-panel");
-
-  if (skillPanel) {
-
-    const skillObserver = new IntersectionObserver(
-      (entries) => {
-
-        entries.forEach((entry) => {
-
-          if (entry.isIntersecting) {
-
-            skillPanel.classList.add("visible");
-
-            skillPanel.querySelectorAll(".skill-bar span").forEach((bar) => {
-              bar.style.setProperty(
-                "--skill-width",
-                bar.dataset.width
-              );
-            });
-
-            skillObserver.unobserve(skillPanel);
-          }
-
-        });
-
-      },
-      {
-        threshold: 0.2
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        revealObserver.unobserve(entry.target);
       }
-    );
+    });
+  }, { threshold:0.12 });
 
-    skillObserver.observe(skillPanel);
+  reveals.forEach((item) => revealObserver.observe(item));
+
+
+  /* SKILL BARS */
+  const skillsPanel = document.querySelector(".skills-panel");
+
+  if (skillsPanel) {
+    const skillObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          skillsPanel.classList.add("visible");
+
+          skillsPanel.querySelectorAll(".skill-bar span").forEach((bar) => {
+            bar.style.setProperty("--skill-width", bar.dataset.width);
+          });
+
+          skillObserver.unobserve(skillsPanel);
+        }
+      });
+    }, { threshold:0.2 });
+
+    skillObserver.observe(skillsPanel);
   }
 
 
-  /* =======================================================
-     WORK FILTERS
-  ======================================================= */
+  /* FILTERS */
+  const buttons = document.querySelectorAll(".filter");
+  const cards = document.querySelectorAll(".project-card");
 
-  const filterButtons = document.querySelectorAll(".filter");
-  const projectCards = document.querySelectorAll(".project-card");
-
-  filterButtons.forEach((button) => {
-
+  buttons.forEach((button) => {
     button.addEventListener("click", () => {
-
-      filterButtons.forEach((btn) => {
-        btn.classList.remove("active");
-      });
-
+      buttons.forEach((b) => b.classList.remove("active"));
       button.classList.add("active");
 
       const filter = button.dataset.filter;
 
-      projectCards.forEach((card) => {
-
-        const category = card.dataset.category;
-
-        if (filter === "all" || category === filter) {
-          card.style.display = "";
-        } else {
-          card.style.display = "none";
-        }
-
+      cards.forEach((card) => {
+        card.style.display =
+          filter === "all" || card.dataset.category === filter
+            ? ""
+            : "none";
       });
-
     });
-
   });
 
 
-  /* =======================================================
-     PROJECT VIDEO MODAL
-  ======================================================= */
-
+  /* PROJECT VIDEO MODAL */
   const modal = document.getElementById("videoModal");
   const iframe = document.getElementById("videoFrame");
-  const modalTitle = document.getElementById("videoModalTitle");
+  const title = document.getElementById("videoModalTitle");
 
-  const closeVideoButtons =
-    document.querySelectorAll("[data-close-video]");
-
-  function openVideo(videoId, title) {
-
-    if (!modal || !iframe) return;
-
-    modalTitle.textContent = title;
-
-    iframe.src =
-      `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeVideo() {
-
-    if (!modal || !iframe) return;
-
+  const close = () => {
     modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-
+    modal.setAttribute("aria-hidden","true");
     iframe.src = "";
-
     document.body.style.overflow = "";
-  }
+  };
 
-  projectCards.forEach((card) => {
-
+  cards.forEach((card) => {
     card.addEventListener("click", () => {
+      const id = card.dataset.video;
+      if (!id) return;
 
-      const videoId = card.dataset.video;
-      const title = card.dataset.title;
+      title.textContent = card.dataset.title || "";
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
 
-      if (videoId) {
-        openVideo(videoId, title);
-      }
-
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
     });
-
   });
 
-  closeVideoButtons.forEach((button) => {
-    button.addEventListener("click", closeVideo);
+  document.querySelectorAll("[data-close-video]").forEach((item) => {
+    item.addEventListener("click", close);
   });
 
-  document.addEventListener("keydown", (event) => {
-
-    if (event.key === "Escape") {
-      closeVideo();
-    }
-
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
   });
 
 
-  /* =======================================================
-     HERO VIDEO SOUND
-  ======================================================= */
-
+  /* HERO VIDEO SOUND */
   const heroVideo = document.getElementById("heroVideo");
-  const soundToggle = document.getElementById("soundToggle");
+  const soundButton = document.getElementById("soundToggle");
 
-  if (heroVideo && soundToggle) {
-
-    soundToggle.addEventListener("click", () => {
-
+  if (heroVideo && soundButton) {
+    soundButton.addEventListener("click", () => {
       heroVideo.muted = !heroVideo.muted;
-
-      if (heroVideo.muted) {
-        soundToggle.textContent = "SOUND OFF";
-      } else {
-        soundToggle.textContent = "SOUND ON";
-      }
-
+      soundButton.textContent = heroVideo.muted ? "SOUND OFF" : "SOUND ON";
     });
-
   }
 
 
-  /* =======================================================
-     CONTACT FORM
-  ======================================================= */
+  /* FORM */
+  const form = document.querySelector(".contact-form");
 
-  const contactForm = document.querySelector(".contact-form");
-
-  if (contactForm) {
-
-    contactForm.addEventListener("submit", () => {
-
-      const button = contactForm.querySelector(".submit-button");
-
-      if (button) {
-        button.innerHTML = "SENDING... <span>↗</span>";
-      }
-
+  if (form) {
+    form.addEventListener("submit", () => {
+      const submit = form.querySelector(".submit-button");
+      if (submit) submit.innerHTML = "SENDING... <span>↗</span>";
     });
-
   }
-
-
-  /* =======================================================
-     NAV ACTIVE FEEL
-  ======================================================= */
-
-  const navLinks = document.querySelectorAll(".nav nav a");
-
-  navLinks.forEach((link) => {
-
-    link.addEventListener("click", () => {
-
-      navLinks.forEach((item) => {
-        item.classList.remove("active");
-      });
-
-      link.classList.add("active");
-
-    });
-
-  });
 
 });
