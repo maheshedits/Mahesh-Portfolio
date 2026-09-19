@@ -1,372 +1,473 @@
-document.addEventListener("DOMContentLoaded", () => {
+/* =====================================================
+   MAHESH PORTFOLIO
+   MAIN JAVASCRIPT
+===================================================== */
 
 
-  /* =========================
-     SCROLL REVEAL
-  ========================== */
+/* =====================================================
+   SMOOTH CURSOR GLOW
+===================================================== */
 
-  const revealElements =
-    document.querySelectorAll(".reveal");
+const cursorGlow = document.querySelector(".cursor-glow");
 
-  const revealObserver =
-    new IntersectionObserver(
-      (entries, observer) => {
+if (
+  cursorGlow &&
+  window.matchMedia("(pointer: fine)").matches
+) {
 
-        entries.forEach((entry) => {
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
 
-          if (entry.isIntersecting) {
+  let currentX = mouseX;
+  let currentY = mouseY;
 
-            entry.target.classList.add("visible");
+  window.addEventListener("mousemove", (event) => {
 
-            observer.unobserve(entry.target);
-
-          }
-
-        });
-
-      },
-      {
-        threshold: 0.12
-      }
-    );
-
-
-  revealElements.forEach((element) => {
-    revealObserver.observe(element);
-  });
-
-
-
-  /* =========================
-     PROJECT FILTERS
-  ========================== */
-
-  const filters =
-    document.querySelectorAll(".filter");
-
-  const projects =
-    document.querySelectorAll(".project-card");
-
-
-  filters.forEach((filter) => {
-
-    filter.addEventListener("click", () => {
-
-      const category =
-        filter.dataset.filter;
-
-
-      filters.forEach((button) => {
-        button.classList.remove("active");
-      });
-
-      filter.classList.add("active");
-
-
-      projects.forEach((project) => {
-
-        const projectCategory =
-          project.dataset.category;
-
-
-        if (
-          category === "all" ||
-          projectCategory === category
-        ) {
-
-          project.style.display = "";
-
-          setTimeout(() => {
-            project.style.opacity = "1";
-            project.style.transform =
-              "translateY(0)";
-          }, 30);
-
-        } else {
-
-          project.style.opacity = "0";
-          project.style.transform =
-            "translateY(15px)";
-
-          setTimeout(() => {
-            project.style.display = "none";
-          }, 250);
-
-        }
-
-      });
-
-    });
+    mouseX = event.clientX;
+    mouseY = event.clientY;
 
   });
 
+  function animateCursor() {
 
+    currentX += (mouseX - currentX) * 0.18;
+    currentY += (mouseY - currentY) * 0.18;
 
-  /* =========================
-     VIDEO MODAL
-  ========================== */
+    cursorGlow.style.transform =
+      `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
 
-  const videoModal =
-    document.getElementById("videoModal");
-
-  const videoFrame =
-    document.getElementById("videoFrame");
-
-  const videoTitle =
-    document.getElementById("videoModalTitle");
-
-  const closeButtons =
-    document.querySelectorAll("[data-close-video]");
-
-
-  projects.forEach((project) => {
-
-    project.addEventListener("click", () => {
-
-      const videoId =
-        project.dataset.video;
-
-      const title =
-        project.dataset.title;
-
-
-      if (!videoId) return;
-
-
-      videoTitle.textContent = title;
-
-
-      videoFrame.src =
-        `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-
-
-      videoModal.classList.add("active");
-
-      videoModal.setAttribute(
-        "aria-hidden",
-        "false"
-      );
-
-      document.body.style.overflow = "hidden";
-
-    });
-
-  });
-
-
-  const closeVideo = () => {
-
-    videoModal.classList.remove("active");
-
-    videoModal.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-    videoFrame.src = "";
-
-    document.body.style.overflow = "";
-
-  };
-
-
-  closeButtons.forEach((button) => {
-
-    button.addEventListener(
-      "click",
-      closeVideo
-    );
-
-  });
-
-
-  document.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (
-        event.key === "Escape" &&
-        videoModal.classList.contains("active")
-      ) {
-
-        closeVideo();
-
-      }
-
-    }
-  );
-
-
-
-  /* =========================
-     HERO VIDEO SOUND
-  ========================== */
-
-  const heroVideo =
-    document.getElementById("heroVideo");
-
-  const soundButton =
-    document.getElementById("soundButton");
-
-
-  if (heroVideo && soundButton) {
-
-    soundButton.addEventListener(
-      "click",
-      () => {
-
-        heroVideo.muted =
-          !heroVideo.muted;
-
-
-        if (heroVideo.muted) {
-
-          soundButton.textContent =
-            "SOUND OFF";
-
-        } else {
-
-          soundButton.textContent =
-            "SOUND ON";
-
-        }
-
-      }
-    );
+    requestAnimationFrame(animateCursor);
 
   }
 
+  animateCursor();
+
+}
 
 
-  /* =========================
-     SKILL BAR ANIMATION
-  ========================== */
+/* =====================================================
+   REVEAL ANIMATIONS
+===================================================== */
 
-  const skillBars =
-    document.querySelectorAll(
-      ".skill-bar span"
-    );
+const revealElements =
+  document.querySelectorAll(".reveal");
 
+const revealObserver =
+  new IntersectionObserver(
+    (entries) => {
 
-  const skillObserver =
-    new IntersectionObserver(
-      (entries, observer) => {
+      entries.forEach((entry) => {
 
-        entries.forEach((entry) => {
+        if (entry.isIntersecting) {
 
-          if (
-            entry.isIntersecting
-          ) {
+          entry.target.classList.add("visible");
 
-            const bar =
-              entry.target;
-
-            const width =
-              bar.dataset.width;
-
-
-            setTimeout(() => {
-
-              bar.style.width =
-                `${width}%`;
-
-            }, 150);
-
-
-            observer.unobserve(bar);
-
-          }
-
-        });
-
-      },
-      {
-        threshold: 0.35
-      }
-    );
-
-
-  skillBars.forEach((bar) => {
-
-    skillObserver.observe(bar);
-
-  });
-
-
-
-  /* =========================
-     SMOOTH NAVIGATION
-  ========================== */
-
-  document
-    .querySelectorAll('a[href^="#"]')
-    .forEach((link) => {
-
-      link.addEventListener(
-        "click",
-        (event) => {
-
-          const targetId =
-            link.getAttribute("href");
-
-          if (
-            !targetId ||
-            targetId === "#"
-          ) {
-            return;
-          }
-
-
-          const target =
-            document.querySelector(
-              targetId
-            );
-
-
-          if (target) {
-
-            event.preventDefault();
-
-            target.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-
-          }
+          revealObserver.unobserve(entry.target);
 
         }
-      );
+
+      });
+
+    },
+    {
+      threshold: 0.12
+    }
+  );
+
+
+revealElements.forEach((element) => {
+
+  revealObserver.observe(element);
+
+});
+
+
+/* =====================================================
+   SKILL BAR ANIMATION
+===================================================== */
+
+const skillBars =
+  document.querySelectorAll(".skill-bar span");
+
+
+const skillObserver =
+  new IntersectionObserver(
+    (entries) => {
+
+      entries.forEach((entry) => {
+
+        if (entry.isIntersecting) {
+
+          const bar = entry.target;
+
+          const width =
+            bar.getAttribute("data-width");
+
+          bar.style.setProperty(
+            "--skill-width",
+            width
+          );
+
+          requestAnimationFrame(() => {
+
+            bar.classList.add("animate");
+
+          });
+
+          skillObserver.unobserve(bar);
+
+        }
+
+      });
+
+    },
+    {
+      threshold: 0.35
+    }
+  );
+
+
+skillBars.forEach((bar) => {
+
+  skillObserver.observe(bar);
+
+});
+
+
+/* =====================================================
+   PROJECT FILTERS
+===================================================== */
+
+const filterButtons =
+  document.querySelectorAll(".filter");
+
+const projectCards =
+  document.querySelectorAll(".project-card");
+
+
+filterButtons.forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    const filter =
+      button.getAttribute("data-filter");
+
+
+    filterButtons.forEach((item) => {
+
+      item.classList.remove("active");
 
     });
 
 
+    button.classList.add("active");
 
-  /* =========================
-     CURSOR GLOW
-  ========================== */
 
-  const cursorGlow =
-    document.createElement("div");
+    projectCards.forEach((card) => {
 
-  cursorGlow.className =
-    "cursor-glow";
+      const category =
+        card.getAttribute("data-category");
 
-  document.body.appendChild(
-    cursorGlow
+
+      if (
+        filter === "all" ||
+        category === filter
+      ) {
+
+        card.classList.remove("hidden");
+
+        requestAnimationFrame(() => {
+
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+
+        });
+
+      } else {
+
+        card.classList.add("hidden");
+
+      }
+
+    });
+
+  });
+
+});
+
+
+/* =====================================================
+   PROJECT VIDEO MODAL
+===================================================== */
+
+const videoModal =
+  document.getElementById("videoModal");
+
+const videoFrame =
+  document.getElementById("videoFrame");
+
+const videoModalTitle =
+  document.getElementById("videoModalTitle");
+
+const closeVideoButtons =
+  document.querySelectorAll("[data-close-video]");
+
+
+const projectCardsWithVideo =
+  document.querySelectorAll(
+    ".project-card[data-video]"
   );
 
 
-  document.addEventListener(
-    "mousemove",
-    (event) => {
+function openVideo(videoId, title) {
 
-      cursorGlow.style.left =
-        `${event.clientX}px`;
+  if (!videoModal || !videoFrame) {
+    return;
+  }
 
-      cursorGlow.style.top =
-        `${event.clientY}px`;
+
+  videoModalTitle.textContent =
+    title || "Project";
+
+
+  videoFrame.src =
+    `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+
+
+  videoModal.classList.add("active");
+
+  videoModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  document.body.style.overflow = "hidden";
+
+}
+
+
+function closeVideo() {
+
+  if (!videoModal || !videoFrame) {
+    return;
+  }
+
+
+  videoModal.classList.remove("active");
+
+  videoModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  videoFrame.src = "";
+
+  document.body.style.overflow = "";
+
+}
+
+
+projectCardsWithVideo.forEach((card) => {
+
+  card.addEventListener("click", () => {
+
+    const videoId =
+      card.getAttribute("data-video");
+
+    const title =
+      card.getAttribute("data-title");
+
+    openVideo(videoId, title);
+
+  });
+
+});
+
+
+closeVideoButtons.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    closeVideo
+  );
+
+});
+
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+
+    if (event.key === "Escape") {
+
+      closeVideo();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   HERO VIDEO SOUND
+===================================================== */
+
+const heroVideo =
+  document.getElementById("heroVideo");
+
+const soundToggle =
+  document.getElementById("soundToggle");
+
+
+if (heroVideo && soundToggle) {
+
+  soundToggle.addEventListener(
+    "click",
+    () => {
+
+      heroVideo.muted =
+        !heroVideo.muted;
+
+
+      if (heroVideo.muted) {
+
+        soundToggle.textContent =
+          "SOUND OFF";
+
+        soundToggle.setAttribute(
+          "aria-label",
+          "Turn sound on"
+        );
+
+      } else {
+
+        soundToggle.textContent =
+          "SOUND ON";
+
+        soundToggle.setAttribute(
+          "aria-label",
+          "Turn sound off"
+        );
+
+      }
 
     }
   );
 
-});
+}
+
+
+/* =====================================================
+   SMOOTH NAVIGATION
+===================================================== */
+
+document
+  .querySelectorAll('a[href^="#"]')
+  .forEach((link) => {
+
+    link.addEventListener("click", (event) => {
+
+      const targetId =
+        link.getAttribute("href");
+
+      if (
+        !targetId ||
+        targetId === "#"
+      ) {
+        return;
+      }
+
+
+      const target =
+        document.querySelector(targetId);
+
+
+      if (!target) {
+        return;
+      }
+
+
+      event.preventDefault();
+
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    });
+
+  });
+
+
+/* =====================================================
+   IMAGE FALLBACK
+===================================================== */
+
+const portrait =
+  document.querySelector(".portrait-frame img");
+
+
+if (portrait) {
+
+  portrait.addEventListener(
+    "error",
+    () => {
+
+      portrait.style.display = "none";
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   CONTACT FORM UX
+===================================================== */
+
+const contactForm =
+  document.querySelector(".contact-form");
+
+
+if (contactForm) {
+
+  contactForm.addEventListener(
+    "submit",
+    () => {
+
+      const button =
+        contactForm.querySelector(
+          ".submit-button"
+        );
+
+
+      if (button) {
+
+        button.innerHTML =
+          "Sending enquiry <span>↗</span>";
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   HERO VIDEO AUTOPLAY FALLBACK
+===================================================== */
+
+if (heroVideo) {
+
+  heroVideo.play().catch(() => {
+
+    // Browser blocked autoplay.
+    // Video will still work after user interaction.
+
+  });
+
+}
