@@ -1,71 +1,372 @@
-const revealItems = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12 });
-revealItems.forEach(el => observer.observe(el));
+document.addEventListener("DOMContentLoaded", () => {
 
-const filters = document.querySelectorAll('.filter');
-const cards = document.querySelectorAll('.project-card');
-filters.forEach(filter => {
-  filter.addEventListener('click', () => {
-    filters.forEach(f => f.classList.remove('active'));
-    filter.classList.add('active');
-    const selected = filter.dataset.filter;
-    cards.forEach(card => {
-      const show = selected === 'all' || card.dataset.category === selected;
-      card.style.display = show ? '' : 'none';
+
+  /* =========================
+     SCROLL REVEAL
+  ========================== */
+
+  const revealElements =
+    document.querySelectorAll(".reveal");
+
+  const revealObserver =
+    new IntersectionObserver(
+      (entries, observer) => {
+
+        entries.forEach((entry) => {
+
+          if (entry.isIntersecting) {
+
+            entry.target.classList.add("visible");
+
+            observer.unobserve(entry.target);
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+
+  revealElements.forEach((element) => {
+    revealObserver.observe(element);
+  });
+
+
+
+  /* =========================
+     PROJECT FILTERS
+  ========================== */
+
+  const filters =
+    document.querySelectorAll(".filter");
+
+  const projects =
+    document.querySelectorAll(".project-card");
+
+
+  filters.forEach((filter) => {
+
+    filter.addEventListener("click", () => {
+
+      const category =
+        filter.dataset.filter;
+
+
+      filters.forEach((button) => {
+        button.classList.remove("active");
+      });
+
+      filter.classList.add("active");
+
+
+      projects.forEach((project) => {
+
+        const projectCategory =
+          project.dataset.category;
+
+
+        if (
+          category === "all" ||
+          projectCategory === category
+        ) {
+
+          project.style.display = "";
+
+          setTimeout(() => {
+            project.style.opacity = "1";
+            project.style.transform =
+              "translateY(0)";
+          }, 30);
+
+        } else {
+
+          project.style.opacity = "0";
+          project.style.transform =
+            "translateY(15px)";
+
+          setTimeout(() => {
+            project.style.display = "none";
+          }, 250);
+
+        }
+
+      });
+
     });
-  });
-});
 
-document.querySelectorAll('a[href^="#"]').forEach(link => {
-  link.addEventListener('click', e => {
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
   });
-});
 
-const videoModal = document.getElementById('videoModal');
-const videoFrame = document.getElementById('videoFrame');
-const videoModalTitle = document.getElementById('videoModalTitle');
-document.querySelectorAll('.project-card[data-video]').forEach(card => {
-  card.addEventListener('click', () => {
-    const id = card.dataset.video;
-    videoModalTitle.textContent = card.dataset.title || 'Project';
-    videoFrame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-    videoModal.classList.add('open');
-    videoModal.setAttribute('aria-hidden','false');
-    document.body.style.overflow='hidden';
+
+
+  /* =========================
+     VIDEO MODAL
+  ========================== */
+
+  const videoModal =
+    document.getElementById("videoModal");
+
+  const videoFrame =
+    document.getElementById("videoFrame");
+
+  const videoTitle =
+    document.getElementById("videoModalTitle");
+
+  const closeButtons =
+    document.querySelectorAll("[data-close-video]");
+
+
+  projects.forEach((project) => {
+
+    project.addEventListener("click", () => {
+
+      const videoId =
+        project.dataset.video;
+
+      const title =
+        project.dataset.title;
+
+
+      if (!videoId) return;
+
+
+      videoTitle.textContent = title;
+
+
+      videoFrame.src =
+        `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+
+
+      videoModal.classList.add("active");
+
+      videoModal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.style.overflow = "hidden";
+
+    });
+
   });
-});
-function closeVideo(){
-  videoModal.classList.remove('open');
-  videoModal.setAttribute('aria-hidden','true');
-  videoFrame.src='';
-  document.body.style.overflow='';
-}
-document.querySelectorAll('[data-close-video]').forEach(el => el.addEventListener('click', closeVideo));
-document.addEventListener('keydown', e => { if(e.key==='Escape' && videoModal.classList.contains('open')) closeVideo(); });
 
-const heroVideo = document.querySelector('.hero-video');
-const soundToggle = document.querySelector('.sound-toggle');
-if (heroVideo && soundToggle) {
-  soundToggle.addEventListener('click', () => {
-    heroVideo.muted = !heroVideo.muted;
-    soundToggle.textContent = heroVideo.muted ? 'SOUND OFF' : 'SOUND ON';
-    if (!heroVideo.muted) heroVideo.play().catch(()=>{});
+
+  const closeVideo = () => {
+
+    videoModal.classList.remove("active");
+
+    videoModal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    videoFrame.src = "";
+
+    document.body.style.overflow = "";
+
+  };
+
+
+  closeButtons.forEach((button) => {
+
+    button.addEventListener(
+      "click",
+      closeVideo
+    );
+
   });
-}
 
-const cursorGlow = document.querySelector('.cursor-glow');
-window.addEventListener('mousemove', e => {
-  if (!cursorGlow) return;
-  cursorGlow.style.left = `${e.clientX}px`;
-  cursorGlow.style.top = `${e.clientY}px`;
-  cursorGlow.style.opacity = '1';
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key === "Escape" &&
+        videoModal.classList.contains("active")
+      ) {
+
+        closeVideo();
+
+      }
+
+    }
+  );
+
+
+
+  /* =========================
+     HERO VIDEO SOUND
+  ========================== */
+
+  const heroVideo =
+    document.getElementById("heroVideo");
+
+  const soundButton =
+    document.getElementById("soundButton");
+
+
+  if (heroVideo && soundButton) {
+
+    soundButton.addEventListener(
+      "click",
+      () => {
+
+        heroVideo.muted =
+          !heroVideo.muted;
+
+
+        if (heroVideo.muted) {
+
+          soundButton.textContent =
+            "SOUND OFF";
+
+        } else {
+
+          soundButton.textContent =
+            "SOUND ON";
+
+        }
+
+      }
+    );
+
+  }
+
+
+
+  /* =========================
+     SKILL BAR ANIMATION
+  ========================== */
+
+  const skillBars =
+    document.querySelectorAll(
+      ".skill-bar span"
+    );
+
+
+  const skillObserver =
+    new IntersectionObserver(
+      (entries, observer) => {
+
+        entries.forEach((entry) => {
+
+          if (
+            entry.isIntersecting
+          ) {
+
+            const bar =
+              entry.target;
+
+            const width =
+              bar.dataset.width;
+
+
+            setTimeout(() => {
+
+              bar.style.width =
+                `${width}%`;
+
+            }, 150);
+
+
+            observer.unobserve(bar);
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.35
+      }
+    );
+
+
+  skillBars.forEach((bar) => {
+
+    skillObserver.observe(bar);
+
+  });
+
+
+
+  /* =========================
+     SMOOTH NAVIGATION
+  ========================== */
+
+  document
+    .querySelectorAll('a[href^="#"]')
+    .forEach((link) => {
+
+      link.addEventListener(
+        "click",
+        (event) => {
+
+          const targetId =
+            link.getAttribute("href");
+
+          if (
+            !targetId ||
+            targetId === "#"
+          ) {
+            return;
+          }
+
+
+          const target =
+            document.querySelector(
+              targetId
+            );
+
+
+          if (target) {
+
+            event.preventDefault();
+
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+
+          }
+
+        }
+      );
+
+    });
+
+
+
+  /* =========================
+     CURSOR GLOW
+  ========================== */
+
+  const cursorGlow =
+    document.createElement("div");
+
+  cursorGlow.className =
+    "cursor-glow";
+
+  document.body.appendChild(
+    cursorGlow
+  );
+
+
+  document.addEventListener(
+    "mousemove",
+    (event) => {
+
+      cursorGlow.style.left =
+        `${event.clientX}px`;
+
+      cursorGlow.style.top =
+        `${event.clientY}px`;
+
+    }
+  );
+
 });
