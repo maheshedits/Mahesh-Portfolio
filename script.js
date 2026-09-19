@@ -1,151 +1,87 @@
-document.addEventListener("DOMContentLoaded", () => {
+const revealItems = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealItems.forEach(el => observer.observe(el));
 
-  /* SMOOTH CURSOR GLOW */
-  const glow = document.querySelector(".cursor-glow");
-
-  if (glow && window.matchMedia("(pointer:fine)").matches) {
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let currentX = targetX;
-    let currentY = targetY;
-
-    window.addEventListener("mousemove", (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-      glow.style.opacity = "1";
-    }, { passive:true });
-
-    window.addEventListener("mouseleave", () => {
-      glow.style.opacity = "0";
+const filters = document.querySelectorAll('.filter');
+const cards = document.querySelectorAll('.project-card');
+filters.forEach(filter => {
+  filter.addEventListener('click', () => {
+    filters.forEach(f => f.classList.remove('active'));
+    filter.classList.add('active');
+    const selected = filter.dataset.filter;
+    cards.forEach(card => {
+      const show = selected === 'all' || card.dataset.category === selected;
+      card.style.display = show ? '' : 'none';
     });
+  });
+});
 
-    const tick = () => {
-      currentX += (targetX - currentX) * 0.20;
-      currentY += (targetY - currentY) * 0.20;
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+  });
+});
 
-      glow.style.transform =
-        `translate3d(${currentX}px,${currentY}px,0) translate(-50%,-50%)`;
+const videoModal = document.getElementById('videoModal');
+const videoFrame = document.getElementById('videoFrame');
+const videoModalTitle = document.getElementById('videoModalTitle');
+document.querySelectorAll('.project-card[data-video]').forEach(card => {
+  card.addEventListener('click', () => {
+    const id = card.dataset.video;
+    videoModalTitle.textContent = card.dataset.title || 'Project';
+    videoFrame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    videoModal.classList.add('open');
+    videoModal.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+  });
+});
+function closeVideo(){
+  videoModal.classList.remove('open');
+  videoModal.setAttribute('aria-hidden','true');
+  videoFrame.src='';
+  document.body.style.overflow='';
+}
+document.querySelectorAll('[data-close-video]').forEach(el => el.addEventListener('click', closeVideo));
+document.addEventListener('keydown', e => { if(e.key==='Escape' && videoModal.classList.contains('open')) closeVideo(); });
 
-      requestAnimationFrame(tick);
-    };
+const heroVideo = document.querySelector('.hero-video');
+const soundToggle = document.querySelector('.sound-toggle');
+if (heroVideo && soundToggle) {
+  soundToggle.addEventListener('click', () => {
+    heroVideo.muted = !heroVideo.muted;
+    soundToggle.textContent = heroVideo.muted ? 'SOUND OFF' : 'SOUND ON';
+    if (!heroVideo.muted) heroVideo.play().catch(()=>{});
+  });
+}
 
-    tick();
-  }
+const cursorGlow = document.querySelector('.cursor-glow');
+window.addEventListener('mousemove', e => {
+  if (!cursorGlow) return;
+  cursorGlow.style.left = `${e.clientX}px`;
+  cursorGlow.style.top = `${e.clientY}px`;
+  cursorGlow.style.opacity = '1';
+});
 
 
-  /* SCROLL REVEAL */
-  const reveals = document.querySelectorAll(".reveal");
-
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
+// Animate skill percentage bars when they enter the viewport.
+const skillBars = document.querySelectorAll('.skill-bar span');
+if (skillBars.length) {
+  const skillObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        revealObserver.unobserve(entry.target);
+        entry.target.classList.add('animated');
+        observer.unobserve(entry.target);
       }
     });
-  }, { threshold:0.12 });
+  }, { threshold: 0.35 });
 
-  reveals.forEach((item) => revealObserver.observe(item));
-
-
-  /* SKILL BARS */
-  const skillsPanel = document.querySelector(".skills-panel");
-
-  if (skillsPanel) {
-    const skillObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          skillsPanel.classList.add("visible");
-
-          skillsPanel.querySelectorAll(".skill-bar span").forEach((bar) => {
-            bar.style.setProperty("--skill-width", bar.dataset.width);
-          });
-
-          skillObserver.unobserve(skillsPanel);
-        }
-      });
-    }, { threshold:0.2 });
-
-    skillObserver.observe(skillsPanel);
-  }
-
-
-  /* FILTERS */
-  const buttons = document.querySelectorAll(".filter");
-  const cards = document.querySelectorAll(".project-card");
-
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      buttons.forEach((b) => b.classList.remove("active"));
-      button.classList.add("active");
-
-      const filter = button.dataset.filter;
-
-      cards.forEach((card) => {
-        card.style.display =
-          filter === "all" || card.dataset.category === filter
-            ? ""
-            : "none";
-      });
-    });
-  });
-
-
-  /* PROJECT VIDEO MODAL */
-  const modal = document.getElementById("videoModal");
-  const iframe = document.getElementById("videoFrame");
-  const title = document.getElementById("videoModalTitle");
-
-  const close = () => {
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden","true");
-    iframe.src = "";
-    document.body.style.overflow = "";
-  };
-
-  cards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = card.dataset.video;
-      if (!id) return;
-
-      title.textContent = card.dataset.title || "";
-      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden","false");
-      document.body.style.overflow = "hidden";
-    });
-  });
-
-  document.querySelectorAll("[data-close-video]").forEach((item) => {
-    item.addEventListener("click", close);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
-  });
-
-
-  /* HERO VIDEO SOUND */
-  const heroVideo = document.getElementById("heroVideo");
-  const soundButton = document.getElementById("soundToggle");
-
-  if (heroVideo && soundButton) {
-    soundButton.addEventListener("click", () => {
-      heroVideo.muted = !heroVideo.muted;
-      soundButton.textContent = heroVideo.muted ? "SOUND OFF" : "SOUND ON";
-    });
-  }
-
-
-  /* FORM */
-  const form = document.querySelector(".contact-form");
-
-  if (form) {
-    form.addEventListener("submit", () => {
-      const submit = form.querySelector(".submit-button");
-      if (submit) submit.innerHTML = "SENDING... <span>↗</span>";
-    });
-  }
-
-});
+  skillBars.forEach(bar => skillObserver.observe(bar));
+}
