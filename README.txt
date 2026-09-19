@@ -1,17 +1,26 @@
-MAHESH VIDEO EDITOR PORTFOLIO
+MAHESH PORTFOLIO V2
 
-This version contains 7 real YouTube projects:
-1. GBP Wizards Reel Edit
-2. Mini Meadow Client Reel Edit
-3. AA23 × Mahesh Edits
-4. Dheema Lyrical Edit
-5. GBP Wizards Intro Animation
-6. Mini Meadow Client Edit (After Effects)
-7. Fareworks Logo Animation
+Included:
+- index.html
+- style.css
+- script.js
+- assets/mahesh-portrait.webp
+- assets/showreel.mp4
 
-Clicking a project opens the YouTube video in a cinematic popup on the site.
+NEW IN THIS VERSION
+- Hero showreel video using assets/showreel.mp4
+- Sound on/off control for the hero video
+- Mahesh portrait in About section
+- Redesigned tools section with bento-style cards
+- Contact form with name, email, project type, budget and project details
+- Netlify Forms enabled for the contact form
+- Existing 8 YouTube projects retained
+- Small reveal, hover and cursor animations
 
-NETLIFY UPDATE:
-Because this site is connected to GitHub, replace the changed index.html, style.css and script.js files in your GitHub repository and commit them. Netlify should automatically deploy the new version.
+GITHUB / NETLIFY
+Upload/replace index.html, style.css and script.js in the repository.
+Also upload the entire assets folder, containing mahesh-portrait.webp and showreel.mp4.
+Commit the changes. Netlify will redeploy automatically.
 
-No video files are stored in GitHub; thumbnails are loaded from YouTube and playback is embedded from YouTube.
+CONTACT FORM
+The form uses Netlify Forms. After deployment, submissions appear in Netlify under Forms. You can also configure email notifications in Netlify.
