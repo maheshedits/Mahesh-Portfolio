@@ -1,69 +1,64 @@
-/* =====================================================
-   MAHESH PORTFOLIO
-   MAIN JAVASCRIPT
-===================================================== */
+/* =========================================================
+   MAHESH PORTFOLIO — JAVASCRIPT
+========================================================= */
 
+document.addEventListener("DOMContentLoaded", () => {
 
-/* =====================================================
-   SMOOTH CURSOR GLOW
-===================================================== */
+  /* =======================================================
+     SMOOTH CURSOR GLOW
+  ======================================================= */
 
-const cursorGlow = document.querySelector(".cursor-glow");
+  const cursorGlow = document.querySelector(".cursor-glow");
 
-if (
-  cursorGlow &&
-  window.matchMedia("(pointer: fine)").matches
-) {
+  if (cursorGlow && window.matchMedia("(pointer: fine)").matches) {
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
 
-  let currentX = mouseX;
-  let currentY = mouseY;
+    let glowX = mouseX;
+    let glowY = mouseY;
 
-  window.addEventListener("mousemove", (event) => {
+    window.addEventListener("mousemove", (event) => {
+      mouseX = event.clientX;
+      mouseY = event.clientY;
 
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+      cursorGlow.style.opacity = "1";
+    }, { passive: true });
 
-  });
+    window.addEventListener("mouseleave", () => {
+      cursorGlow.style.opacity = "0";
+    });
 
-  function animateCursor() {
+    function animateCursor() {
 
-    currentX += (mouseX - currentX) * 0.18;
-    currentY += (mouseY - currentY) * 0.18;
+      /* Smooth interpolation — no laggy CSS left/top updates */
+      glowX += (mouseX - glowX) * 0.16;
+      glowY += (mouseY - glowY) * 0.16;
 
-    cursorGlow.style.transform =
-      `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+      cursorGlow.style.transform =
+        `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
 
-    requestAnimationFrame(animateCursor);
+      requestAnimationFrame(animateCursor);
+    }
 
+    animateCursor();
   }
 
-  animateCursor();
 
-}
+  /* =======================================================
+     SCROLL REVEAL
+  ======================================================= */
 
+  const revealItems = document.querySelectorAll(".reveal");
 
-/* =====================================================
-   REVEAL ANIMATIONS
-===================================================== */
-
-const revealElements =
-  document.querySelectorAll(".reveal");
-
-const revealObserver =
-  new IntersectionObserver(
+  const revealObserver = new IntersectionObserver(
     (entries) => {
 
       entries.forEach((entry) => {
 
         if (entry.isIntersecting) {
-
           entry.target.classList.add("visible");
-
           revealObserver.unobserve(entry.target);
-
         }
 
       });
@@ -74,400 +69,215 @@ const revealObserver =
     }
   );
 
-
-revealElements.forEach((element) => {
-
-  revealObserver.observe(element);
-
-});
+  revealItems.forEach((item) => {
+    revealObserver.observe(item);
+  });
 
 
-/* =====================================================
-   SKILL BAR ANIMATION
-===================================================== */
+  /* =======================================================
+     SKILL BAR ANIMATION
+  ======================================================= */
 
-const skillBars =
-  document.querySelectorAll(".skill-bar span");
+  const skillPanel = document.querySelector(".skills-panel");
+
+  if (skillPanel) {
+
+    const skillObserver = new IntersectionObserver(
+      (entries) => {
+
+        entries.forEach((entry) => {
+
+          if (entry.isIntersecting) {
+
+            skillPanel.classList.add("visible");
+
+            skillPanel.querySelectorAll(".skill-bar span").forEach((bar) => {
+              bar.style.setProperty(
+                "--skill-width",
+                bar.dataset.width
+              );
+            });
+
+            skillObserver.unobserve(skillPanel);
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.2
+      }
+    );
+
+    skillObserver.observe(skillPanel);
+  }
 
 
-const skillObserver =
-  new IntersectionObserver(
-    (entries) => {
+  /* =======================================================
+     WORK FILTERS
+  ======================================================= */
 
-      entries.forEach((entry) => {
+  const filterButtons = document.querySelectorAll(".filter");
+  const projectCards = document.querySelectorAll(".project-card");
 
-        if (entry.isIntersecting) {
+  filterButtons.forEach((button) => {
 
-          const bar = entry.target;
+    button.addEventListener("click", () => {
 
-          const width =
-            bar.getAttribute("data-width");
+      filterButtons.forEach((btn) => {
+        btn.classList.remove("active");
+      });
 
-          bar.style.setProperty(
-            "--skill-width",
-            width
-          );
+      button.classList.add("active");
 
-          requestAnimationFrame(() => {
+      const filter = button.dataset.filter;
 
-            bar.classList.add("animate");
+      projectCards.forEach((card) => {
 
-          });
+        const category = card.dataset.category;
 
-          skillObserver.unobserve(bar);
-
+        if (filter === "all" || category === filter) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
         }
 
       });
 
-    },
-    {
-      threshold: 0.35
-    }
-  );
-
-
-skillBars.forEach((bar) => {
-
-  skillObserver.observe(bar);
-
-});
-
-
-/* =====================================================
-   PROJECT FILTERS
-===================================================== */
-
-const filterButtons =
-  document.querySelectorAll(".filter");
-
-const projectCards =
-  document.querySelectorAll(".project-card");
-
-
-filterButtons.forEach((button) => {
-
-  button.addEventListener("click", () => {
-
-    const filter =
-      button.getAttribute("data-filter");
-
-
-    filterButtons.forEach((item) => {
-
-      item.classList.remove("active");
-
     });
 
-
-    button.classList.add("active");
-
-
-    projectCards.forEach((card) => {
-
-      const category =
-        card.getAttribute("data-category");
+  });
 
 
-      if (
-        filter === "all" ||
-        category === filter
-      ) {
+  /* =======================================================
+     PROJECT VIDEO MODAL
+  ======================================================= */
 
-        card.classList.remove("hidden");
+  const modal = document.getElementById("videoModal");
+  const iframe = document.getElementById("videoFrame");
+  const modalTitle = document.getElementById("videoModalTitle");
 
-        requestAnimationFrame(() => {
+  const closeVideoButtons =
+    document.querySelectorAll("[data-close-video]");
 
-          card.style.opacity = "1";
-          card.style.transform = "translateY(0)";
+  function openVideo(videoId, title) {
 
-        });
+    if (!modal || !iframe) return;
 
-      } else {
+    modalTitle.textContent = title;
 
-        card.classList.add("hidden");
+    iframe.src =
+      `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
 
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeVideo() {
+
+    if (!modal || !iframe) return;
+
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+
+    iframe.src = "";
+
+    document.body.style.overflow = "";
+  }
+
+  projectCards.forEach((card) => {
+
+    card.addEventListener("click", () => {
+
+      const videoId = card.dataset.video;
+      const title = card.dataset.title;
+
+      if (videoId) {
+        openVideo(videoId, title);
       }
 
     });
 
   });
 
-});
-
-
-/* =====================================================
-   PROJECT VIDEO MODAL
-===================================================== */
-
-const videoModal =
-  document.getElementById("videoModal");
-
-const videoFrame =
-  document.getElementById("videoFrame");
-
-const videoModalTitle =
-  document.getElementById("videoModalTitle");
-
-const closeVideoButtons =
-  document.querySelectorAll("[data-close-video]");
-
-
-const projectCardsWithVideo =
-  document.querySelectorAll(
-    ".project-card[data-video]"
-  );
-
-
-function openVideo(videoId, title) {
-
-  if (!videoModal || !videoFrame) {
-    return;
-  }
-
-
-  videoModalTitle.textContent =
-    title || "Project";
-
-
-  videoFrame.src =
-    `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-
-
-  videoModal.classList.add("active");
-
-  videoModal.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-
-  document.body.style.overflow = "hidden";
-
-}
-
-
-function closeVideo() {
-
-  if (!videoModal || !videoFrame) {
-    return;
-  }
-
-
-  videoModal.classList.remove("active");
-
-  videoModal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-
-  videoFrame.src = "";
-
-  document.body.style.overflow = "";
-
-}
-
-
-projectCardsWithVideo.forEach((card) => {
-
-  card.addEventListener("click", () => {
-
-    const videoId =
-      card.getAttribute("data-video");
-
-    const title =
-      card.getAttribute("data-title");
-
-    openVideo(videoId, title);
-
+  closeVideoButtons.forEach((button) => {
+    button.addEventListener("click", closeVideo);
   });
 
-});
-
-
-closeVideoButtons.forEach((button) => {
-
-  button.addEventListener(
-    "click",
-    closeVideo
-  );
-
-});
-
-
-document.addEventListener(
-  "keydown",
-  (event) => {
+  document.addEventListener("keydown", (event) => {
 
     if (event.key === "Escape") {
-
       closeVideo();
-
     }
 
-  }
-);
+  });
 
 
-/* =====================================================
-   HERO VIDEO SOUND
-===================================================== */
+  /* =======================================================
+     HERO VIDEO SOUND
+  ======================================================= */
 
-const heroVideo =
-  document.getElementById("heroVideo");
+  const heroVideo = document.getElementById("heroVideo");
+  const soundToggle = document.getElementById("soundToggle");
 
-const soundToggle =
-  document.getElementById("soundToggle");
+  if (heroVideo && soundToggle) {
 
+    soundToggle.addEventListener("click", () => {
 
-if (heroVideo && soundToggle) {
-
-  soundToggle.addEventListener(
-    "click",
-    () => {
-
-      heroVideo.muted =
-        !heroVideo.muted;
-
+      heroVideo.muted = !heroVideo.muted;
 
       if (heroVideo.muted) {
-
-        soundToggle.textContent =
-          "SOUND OFF";
-
-        soundToggle.setAttribute(
-          "aria-label",
-          "Turn sound on"
-        );
-
+        soundToggle.textContent = "SOUND OFF";
       } else {
-
-        soundToggle.textContent =
-          "SOUND ON";
-
-        soundToggle.setAttribute(
-          "aria-label",
-          "Turn sound off"
-        );
-
+        soundToggle.textContent = "SOUND ON";
       }
 
-    }
-  );
+    });
 
-}
+  }
 
 
-/* =====================================================
-   SMOOTH NAVIGATION
-===================================================== */
+  /* =======================================================
+     CONTACT FORM
+  ======================================================= */
 
-document
-  .querySelectorAll('a[href^="#"]')
-  .forEach((link) => {
+  const contactForm = document.querySelector(".contact-form");
 
-    link.addEventListener("click", (event) => {
+  if (contactForm) {
 
-      const targetId =
-        link.getAttribute("href");
+    contactForm.addEventListener("submit", () => {
 
-      if (
-        !targetId ||
-        targetId === "#"
-      ) {
-        return;
+      const button = contactForm.querySelector(".submit-button");
+
+      if (button) {
+        button.innerHTML = "SENDING... <span>↗</span>";
       }
 
+    });
 
-      const target =
-        document.querySelector(targetId);
-
-
-      if (!target) {
-        return;
-      }
+  }
 
 
-      event.preventDefault();
+  /* =======================================================
+     NAV ACTIVE FEEL
+  ======================================================= */
 
+  const navLinks = document.querySelectorAll(".nav nav a");
 
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+  navLinks.forEach((link) => {
+
+    link.addEventListener("click", () => {
+
+      navLinks.forEach((item) => {
+        item.classList.remove("active");
       });
+
+      link.classList.add("active");
 
     });
 
   });
 
-
-/* =====================================================
-   IMAGE FALLBACK
-===================================================== */
-
-const portrait =
-  document.querySelector(".portrait-frame img");
-
-
-if (portrait) {
-
-  portrait.addEventListener(
-    "error",
-    () => {
-
-      portrait.style.display = "none";
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   CONTACT FORM UX
-===================================================== */
-
-const contactForm =
-  document.querySelector(".contact-form");
-
-
-if (contactForm) {
-
-  contactForm.addEventListener(
-    "submit",
-    () => {
-
-      const button =
-        contactForm.querySelector(
-          ".submit-button"
-        );
-
-
-      if (button) {
-
-        button.innerHTML =
-          "Sending enquiry <span>↗</span>";
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   HERO VIDEO AUTOPLAY FALLBACK
-===================================================== */
-
-if (heroVideo) {
-
-  heroVideo.play().catch(() => {
-
-    // Browser blocked autoplay.
-    // Video will still work after user interaction.
-
-  });
-
-}
+});
